@@ -24,13 +24,13 @@ class PoemSerializer(serializers.ModelSerializer):
 
 
 
-class PoetrySerializer(serializers.HyperlinkedModelSerializer):
+class PoetrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Poetry
         fields = ('id', 'title', 'content', 'author', 'dynasty', 'author_name')
 
 
-class AuthorSerializer(serializers.HyperlinkedModelSerializer):
+class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = ('id', 'name', 'intro', 'dynasty')
