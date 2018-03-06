@@ -1,12 +1,16 @@
 from django.core import serializers
 from django.core.serializers.json import Serializer as Buildin_Serializer
-from django.http import HttpResponse
-from rest_framework import viewsets
+from django.http import HttpResponse,JsonResponse
+from rest_framework import viewsets,status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from poem.change import changeSql
 from .models import Poem
 from .serializers import Poetry,Author
 from .serializers import UserSerializer,PoemSerializer,User,AuthorSerializer,PoetrySerializer
+
+import random
 
 
 class Serializer(Buildin_Serializer):
@@ -26,10 +30,27 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class PoemViewSet(viewsets.ModelViewSet):
+# class PoemViewSet(viewsets.ModelViewSet):
+#
+#     queryset = Poem.objects.all()
+#     serializer_class = PoemSerializer
+@api_view(['GET'])
+def PoemDetailView(request,pk=None,format=None):
+    if pk == None:
+        count = Poem.objects.count()
+        pk = random.randint(0,count)
 
-    queryset = Poem.objects.all()
-    serializer_class = PoemSerializer
+
+    try:
+        p = Poem.objects.get(pk=pk)
+    except Poem.DoesNotExist:
+        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == 'GET':
+        poemserial = PoemSerializer(p)
+        return Response(poemserial.data)
+
+
 
 
 class PoetryViewSet(viewsets.ModelViewSet):

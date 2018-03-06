@@ -16,7 +16,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('url', 'name')
 
 
-class PoemSerializer(serializers.HyperlinkedModelSerializer):
+class PoemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Poem
         fields = ('id', 'title', 'content', 'author', 'dynasty', 'author_name')

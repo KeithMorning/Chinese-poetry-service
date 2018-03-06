@@ -5,7 +5,6 @@ from poem import views
 
 routers = routers.DefaultRouter()
 routers.register(r'users',views.UserViewSet)
-routers.register(r'poems',views.PoemViewSet)
 routers.register(r'poetries',views.PoetryViewSet)
 routers.register(r'authors',views.AuthorViewSet)
 
@@ -13,5 +12,7 @@ routers.register(r'authors',views.AuthorViewSet)
 urlpatterns = [
     path(r'test',views.index,name = 'index'),
     url('',include(routers.urls)),
+    url(r'^poems/$',views.PoemDetailView,name='Poem random'),
+    url(r'^poems/(?P<pk>[0-9]+)/$',views.PoemDetailView),
     url(r'^api-auth/',include('rest_framework.urls',namespace='rest_framework')),
 ]
