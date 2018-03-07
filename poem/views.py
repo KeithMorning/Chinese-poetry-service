@@ -2,8 +2,9 @@ from django.core import serializers
 from django.core.serializers.json import Serializer as Buildin_Serializer
 from django.http import HttpResponse,JsonResponse
 from rest_framework import viewsets,status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,detail_route
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from poem.change import changeSql
 from .models import Poem
@@ -36,7 +37,10 @@ class UserViewSet(viewsets.ModelViewSet):
 #     queryset = Poem.objects.all()
 #     serializer_class = PoemSerializer
 @api_view(['GET'])
-def PoemDetailView(request,pk=None,format=None):
+def PoemDetailView(request,id=None,format=None):
+
+    pk = id
+
     if pk == None:
         count = Poem.objects.count()
         pk = random.randint(0,count)
@@ -53,8 +57,9 @@ def PoemDetailView(request,pk=None,format=None):
 
 
 @api_view(['GET'])
-def PoetryDetailView(request,pk=None,format = None):
+def PoetryDetailView(request,id=None,format = None):
 
+    pk=id
     if pk == None:
         count = Poetry.objects.count()
         pk = random.randint(0,count)
@@ -75,9 +80,38 @@ def PoetryDetailView(request,pk=None,format = None):
 #     serializer_class = PoetrySerializer
 
 
-class AuthorViewSet(viewsets.ModelViewSet):
+class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
     pagination_class = mypagination
+
+
+class AuthorPoetries(APIView):
+
+    def get(self,request,id=None):
+        pk = id
+        if pk == None:
+            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
+
+        poetries = Poetry.objects.filter(author=pk)
+        poetries_result = PoetrySerializer(poetries, many=True)
+        return Response(poetries_result.data)
+
+
+
+class AuthorPoemes(APIView):
+
+    def get(self,request,id=None):
+        pk = id
+        if pk == None:
+            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
+
+        poems = Poem.objects.filter(author=pk)
+        poems_result = PoemSerializer(poems, many=True)
+        return Response(poems_result.data)
+
+
+
+
 
 
