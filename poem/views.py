@@ -20,6 +20,7 @@ class Serializer(Buildin_Serializer):
         return self._current
 
 # Create your views here.
+
 def index(request):
 
     poem = Poem.objects.first()
@@ -32,52 +33,47 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-# class PoemViewSet(viewsets.ModelViewSet):
-#
-#     queryset = Poem.objects.all()
-#     serializer_class = PoemSerializer
-@api_view(['GET'])
-def PoemDetailView(request,id=None,format=None):
+class PoemViewSet(viewsets.ReadOnlyModelViewSet):
 
-    pk = id
+    queryset = Poem.objects.all()
+    serializer_class = PoemSerializer
+    pagination_class = mypagination
 
-    if pk == None:
+    @detail_route(['GET'])
+    def random(self,request):
+
         count = Poem.objects.count()
-        pk = random.randint(0,count)
+        id = random.randint(0, count)
 
+        try:
+            p = Poem.objects.get(pk=id)
+        except Poem.DoesNotExist:
+            return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        p = Poem.objects.get(pk=pk)
-    except Poem.DoesNotExist:
-        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+        if request.method == 'GET':
+            poemserial = PoemSerializer(p)
+            return Response(poemserial.data)
 
-    if request.method == 'GET':
-        poemserial = PoemSerializer(p)
-        return Response(poemserial.data)
+class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
 
+    queryset = Poetry.objects.all().order_by('id')
+    serializer_class = PoetrySerializer
+    pagination_class = mypagination
 
-@api_view(['GET'])
-def PoetryDetailView(request,id=None,format = None):
+    @detail_route(['GET'])
+    def random(self,request):
+        count = Poem.objects.count()
+        pk = random.randint(0, count)
 
-    pk=id
-    if pk == None:
-        count = Poetry.objects.count()
-        pk = random.randint(0,count)
+        try:
+            p = Poetry.objects.get(pk=pk)
+        except Poetry.DoesNotExist:
+            return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
+        if request.method == 'GET':
+            poetryserial = PoetrySerializer(p)
+            return Response(poetryserial.data)
 
-    try:
-        p = Poetry.objects.get(pk=pk)
-    except Poetry.DoesNotExist:
-        return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
-
-    if request.method == 'GET':
-        poetryserial = PoetrySerializer(p)
-        return Response(poetryserial.data)
-#
-# class PoetryViewSet(viewsets.ModelViewSet):
-#
-#     queryset = Poetry.objects.all()
-#     serializer_class = PoetrySerializer
 
 
 class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
@@ -85,30 +81,19 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AuthorSerializer
     pagination_class = mypagination
 
-
-class AuthorPoetries(APIView):
-
-    def get(self,request,id=None):
-        pk = id
-        if pk == None:
-            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-
+    @detail_route(['GET'])
+    def poetry(self,request,pk):
         poetries = Poetry.objects.filter(author=pk)
         poetries_result = PoetrySerializer(poetries, many=True)
         return Response(poetries_result.data)
 
-
-
-class AuthorPoemes(APIView):
-
-    def get(self,request,id=None):
-        pk = id
-        if pk == None:
-            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-
+    @detail_route(['GET'])
+    def poem(self,request,pk):
         poems = Poem.objects.filter(author=pk)
         poems_result = PoemSerializer(poems, many=True)
         return Response(poems_result.data)
+
+
 
 
 

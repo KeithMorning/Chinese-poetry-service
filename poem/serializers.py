@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User, Group
 from .models import Poem, Poetry, Author
 
-from  rest_framework import serializers
+from  rest_framework import serializers,reverse
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -31,6 +31,7 @@ class PoetrySerializer(serializers.ModelSerializer):
 
 
 class AuthorSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Author
         fields = ('id', 'name', 'intro', 'dynasty')

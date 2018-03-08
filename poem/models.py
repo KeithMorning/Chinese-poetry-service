@@ -41,7 +41,7 @@ class Poem(models.Model):
 
 class Poetry(models.Model):
     title = models.CharField(max_length=150)
-    author = models.ForeignKey(Author,on_delete=models.CASCADE)
+    author = models.ForeignKey(Author,related_name='poetries',on_delete=models.CASCADE)
     content = models.TextField()
     dynasty = models.CharField(max_length=10)
     author_name = models.CharField(max_length=150)
