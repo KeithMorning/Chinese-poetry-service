@@ -31,7 +31,7 @@ class ThisWillBeTheApiTitleView(routers.APIRootView):
                 # Don't bail out if eg. no list routes exist, only detail routes.
                 continue
 
-        ret['author-T'] = "http://hs.izixia.cn:8000/poem/author?dynasty=T"
+        ret['author-T'] = "http://hs.izixia.cn:8000/poem/authors?dynasty=T"
         return Response(ret)
 
 
