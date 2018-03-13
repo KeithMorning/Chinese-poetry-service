@@ -5,6 +5,7 @@ from rest_framework import viewsets,status
 from rest_framework.decorators import api_view,detail_route
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 
 from poem.change import changeSql
 from .models import Poem
@@ -77,9 +78,17 @@ class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Author.objects.all()
+
     serializer_class = AuthorSerializer
     pagination_class = mypagination
+    queryset = Author.objects.all()
+
+    def get_queryset(self):
+        queryset = Author.objects.all()
+        dynasty = self.request.query_params.get('dynasty', None)
+        if dynasty is not None:
+            return queryset.filter(dynasty=dynasty)
+        return queryset
 
     @detail_route(['GET'])
     def poetry(self,request,pk):
@@ -92,6 +101,7 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
         poems = Poem.objects.filter(author=pk)
         poems_result = PoemSerializer(poems, many=True)
         return Response(poems_result.data)
+
 
 
 
