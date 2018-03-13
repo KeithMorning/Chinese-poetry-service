@@ -2,6 +2,7 @@ from django.urls import path,re_path
 from django.conf.urls import url,include
 from rest_framework import routers
 from poem import views
+from . import router
 
 proetries_list = views.PoetryViewSet.as_view({
     'get':'list'
@@ -16,7 +17,7 @@ proetries_random = views.PoetryViewSet.as_view({
 })
 
 
-routers = routers.DefaultRouter()
+routers = router.DocumentedRouter()
 routers.register(r'users',views.UserViewSet)
 routers.register(r'poetries',views.PoetryViewSet)
 routers.register(r'poems',views.PoemViewSet)
