@@ -32,6 +32,8 @@ class ThisWillBeTheApiTitleView(routers.APIRootView):
                 continue
 
         ret['author-T'] = "http://hs.izixia.cn:8000/poem/authors?dynasty=T"
+        ret['author-poetry'] = "http://hs.izixia.cn:8000/poem/authors/1/poetry/"
+        ret['author-poem'] = "http://hs.izixia.cn:8000/poem/authors/13175/poem/"
         return Response(ret)
 
 
