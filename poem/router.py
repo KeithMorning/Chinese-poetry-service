@@ -30,10 +30,10 @@ class ThisWillBeTheApiTitleView(routers.APIRootView):
             except NoReverseMatch:
                 # Don't bail out if eg. no list routes exist, only detail routes.
                 continue
-
-        ret['author-T'] = "http://hs.izixia.cn:8000/poem/authors?dynasty=T"
-        ret['author-poetry'] = "http://hs.izixia.cn:8000/poem/authors/1/poetry/"
-        ret['author-poem'] = "http://hs.izixia.cn:8000/poem/authors/13175/poem/"
+        uri = request.build_absolute_uri();
+        ret['author-T'] = uri + "authors?dynasty=T"
+        ret['author-poetry'] = uri+"authors/1/poetry/"
+        ret['author-poem'] = uri + "authors/13175/poem/"
         return Response(ret)
 
 

@@ -19,7 +19,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 class PoemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Poem
-        fields = ('id', 'title', 'content', 'author', 'dynasty', 'author_name')
+        fields = ('id', 'title', 'content', 'author', 'dynasty', 'author_name','weight')
 
 
 
@@ -27,11 +27,11 @@ class PoemSerializer(serializers.ModelSerializer):
 class PoetrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Poetry
-        fields = ('id', 'title', 'content', 'author', 'dynasty', 'author_name')
+        fields = ('id', 'title', 'content', 'author', 'dynasty', 'author_name','weight')
 
 
 class AuthorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Author
-        fields = ('id', 'name', 'intro', 'dynasty')
+        fields = ('id', 'name', 'intro', 'dynasty','weight')
