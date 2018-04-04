@@ -7,9 +7,9 @@ from collections import OrderedDict
 from django.urls.exceptions import NoReverseMatch
 
 
-class ThisWillBeTheApiTitleView(routers.APIRootView):
+class ApiListView(routers.APIRootView):
     """
-    This appears where the docstring goes!
+    `authors/13175/poem/` 获取对应作者的词
     """
 
     def get(self, request, *args, **kwargs):
@@ -39,5 +39,5 @@ class ThisWillBeTheApiTitleView(routers.APIRootView):
 
 
 class DocumentedRouter(routers.DefaultRouter):
-    APIRootView = ThisWillBeTheApiTitleView
+    APIRootView = ApiListView
 
