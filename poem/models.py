@@ -1,8 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
@@ -16,14 +15,6 @@ class Author(models.Model):
     class Meta:
         db_table = 'poem_author'
 
-
-class PoetryAuthor(models.Model):
-    name = models.CharField(max_length=150)
-    intro = models.TextField(blank=True, null=True)
-    dynasty = models.CharField(max_length=10, blank=True, null=True)
-
-    class Meta:
-        db_table = 'poetry_author_bak'
 
 
 class Poem(models.Model):
@@ -39,6 +30,7 @@ class Poem(models.Model):
 
 class Poetry(models.Model):
     title = models.CharField(max_length=150)
+    yunlv_rule = models.TextField(default='')
     author = models.ForeignKey(Author,related_name='poetries',on_delete=models.CASCADE)
     content = models.TextField()
     dynasty = models.CharField(max_length=10)
@@ -50,14 +42,13 @@ class Poetry(models.Model):
 
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
-    login_type = models.CharField(max_length=20,blank=False)
-    weichat_id = models.CharField(max_length=100,null=True)
-    nick_name = models.CharField(max_length=100,blank=True)
-    create_date = models.DateField(null=True,blank=True)
-    location = models.CharField(max_length=100,blank=True)
-    #favorate_peotry = models.ManyToManyField(Poetry)
-    #favorate_poem = models.ManyToManyField(Poem)
+class User (AbstractUser):
+
+    login_type = models.CharField(max_length=20, blank=False)
+    weichat_id = models.CharField(max_length=100, null=True)
+    nick_name = models.CharField(max_length=100, blank=True)
+    location = models.CharField(max_length=100, blank=True)
+    favorate_peotry = models.ManyToManyField(Poetry)
+    favorate_poem = models.ManyToManyField(Poem)
 
 

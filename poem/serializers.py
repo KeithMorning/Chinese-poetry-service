@@ -1,5 +1,5 @@
-from django.contrib.auth.models import User, Group
-from .models import Poem, Poetry, Author
+from django.contrib.auth.models import  Group
+from .models import Poem, Poetry, Author,User
 
 from  rest_framework import serializers,reverse
 

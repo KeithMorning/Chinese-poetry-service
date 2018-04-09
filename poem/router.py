@@ -1,6 +1,5 @@
 from rest_framework import routers
 from django.conf.urls import url
-from .views import index
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from collections import OrderedDict

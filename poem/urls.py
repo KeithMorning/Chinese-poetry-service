@@ -25,7 +25,6 @@ routers.register(r'authors',views.AuthorViewSet)
 
 
 urlpatterns = [
-    path(r'test',views.index,name = 'index'),
     url('',include(routers.urls)),
     url(r'^api-auth/',include('rest_framework.urls',namespace='rest_framework')),
 ]

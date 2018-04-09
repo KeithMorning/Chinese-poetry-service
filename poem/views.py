@@ -7,10 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
-from poem.change import changeSql
-from .models import Poem
+from .models import Poem,User
 from .serializers import Poetry,Author
-from .serializers import UserSerializer,PoemSerializer,User,AuthorSerializer,PoetrySerializer
+from .serializers import UserSerializer,PoemSerializer,AuthorSerializer,PoetrySerializer
 from .myPagination import mypagination
 
 import random
@@ -21,13 +20,6 @@ class Serializer(Buildin_Serializer):
         return self._current
 
 # Create your views here.
-
-def index(request):
-
-    poem = Poem.objects.first()
-    data = serializers.serialize('json',[poem,])
-    changeSql()
-    return HttpResponse(data,content_type="application/json")
 
 
 class UserViewSet(viewsets.ModelViewSet):
