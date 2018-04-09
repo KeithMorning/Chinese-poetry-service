@@ -7,7 +7,7 @@ from  rest_framework import serializers,reverse
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('url', 'username', 'email', 'groups')
+        fields = ('url', 'username', 'email', 'groups','weichat_id','nick_name','login_type')
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):

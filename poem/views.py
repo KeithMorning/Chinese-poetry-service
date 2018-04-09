@@ -11,6 +11,7 @@ from .models import Poem,User
 from .serializers import Poetry,Author
 from .serializers import UserSerializer,PoemSerializer,AuthorSerializer,PoetrySerializer
 from .myPagination import mypagination
+from .weichat_tools import get_user_info
 
 import random
 
@@ -20,6 +21,10 @@ class Serializer(Buildin_Serializer):
         return self._current
 
 # Create your views here.
+
+def WeichatLoginView(resquest):
+    code = resquest.get('code')
+    return JsonResponse({'good':"night"})
 
 
 class UserViewSet(viewsets.ModelViewSet):
