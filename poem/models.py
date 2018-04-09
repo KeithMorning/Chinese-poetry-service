@@ -6,23 +6,6 @@ from django.contrib.auth.admin import UserAdmin
 
 # Create your models here.
 
-class ProfileBase(type):
-    def __new__(cls, name, bases, attrs):
-        module = attrs.pop('__module__')
-        parents = [b for b in bases if isinstance(b,ProfileBase)]
-        if parents:
-            fileds = []
-            for obj_name, obj in attrs.items():
-                if isinstance(obj,models.Field):fileds.append(obj_name)
-                User.add_to_class(obj_name,obj)
-            UserAdmin.fieldsets = list(UserAdmin.fieldsets)
-            UserAdmin.fieldsets.append((name,{'fields':fileds}))
-        return super(ProfileBase,cls).__new__(cls,name,bases,attrs)
-
-
-class ProfileUser(object):
-    __metaclass = ProfileBase
-
 
 class Author(models.Model):
     name = models.CharField(max_length=150)
@@ -31,7 +14,7 @@ class Author(models.Model):
     weight = models.IntegerField()
 
     class Meta:
-        db_table = 'poetry_author'
+        db_table = 'poem_author'
 
 
 class PoetryAuthor(models.Model):
@@ -51,7 +34,7 @@ class Poem(models.Model):
     author_name = models.CharField(max_length=150)
     weight = models.IntegerField()
     class Meta:
-        db_table = 'poems'
+        db_table = 'poem_poems'
 
 
 class Poetry(models.Model):
@@ -63,17 +46,18 @@ class Poetry(models.Model):
     weight = models.IntegerField()
 
     class Meta:
-        db_table = 'poetry'
+        db_table = 'poem_poetry'
 
 
 
-class Profile(ProfileUser):
+class Profile(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
     login_type = models.CharField(max_length=20,blank=False)
     weichat_id = models.CharField(max_length=100,null=True)
     nick_name = models.CharField(max_length=100,blank=True)
     create_date = models.DateField(null=True,blank=True)
     location = models.CharField(max_length=100,blank=True)
-    favorate_peotry = models.ManyToManyField(to=Poetry)
-    favorate_poem = models.ManyToManyField(to=Poem)
-    #avatar = models.BinaryField(m)
+    #favorate_peotry = models.ManyToManyField(Poetry)
+    #favorate_poem = models.ManyToManyField(Poem)
+
 
