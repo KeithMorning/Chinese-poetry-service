@@ -29,5 +29,5 @@ urlpatterns = [
     url('',include(routers.urls)),
     url(r'^api-auth/',include('rest_framework.urls',namespace='rest_framework')),
     url(r'^api-token-auth/',obtain_jwt_token),
-    url(r'^weichat-login',views.WeichatLoginView),
+    url(r'^weichatOAuth',views.WeichatLoginView),
 ]

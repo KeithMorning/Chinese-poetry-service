@@ -4,6 +4,7 @@ from django.http import HttpResponse,JsonResponse
 from rest_framework import viewsets,status
 from rest_framework.decorators import api_view,detail_route
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -11,23 +12,29 @@ from .models import Poem,User
 from .serializers import Poetry,Author
 from .serializers import UserSerializer,PoemSerializer,AuthorSerializer,PoetrySerializer
 from .myPagination import mypagination
-from .weichat_tools import get_user_info
-
-import random
+from .weichat_tools import get_user_info,to_weichat_jwt,random_passwd
+from . import apps
 
 
 class Serializer(Buildin_Serializer):
     def get_dump_object(self,obj):
         return self._current
-
 # Create your views here.
 
 def WeichatLoginView(resquest):
-    code = resquest.get('code')
-    return JsonResponse({'good':"night"})
+    code = resquest.GET.get('code',None)
+    session_key,openid = get_user_info(code,apps.APP_ID,appsecret=apps.APP_SECRET)
+    users = User.objects.filter(username=openid)
+    if users == None or users.count()==0:
+        user = User(username=openid,password=random_passwd(),email='n@n.com')
+        user.save()
+    user = users.first()
+    jwt = token = to_weichat_jwt(user)
+    return JsonResponse({'jwt':jwt})
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
