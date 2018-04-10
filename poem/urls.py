@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^api-auth/',include('rest_framework.urls',namespace='rest_framework')),
     url(r'^api-token-auth/',obtain_jwt_token),
     url(r'^weichatOAuth',views.WeichatLoginView),
-    url(r'^favorate-poetry',views.favorite_poetry),
-    url(r'^favorate-poem',views.favorite_poem),
+    url(r'^favour-poetry',views.favorite_poetry),
+    url(r'^favour-poem',views.favorite_poem),
+    url(r'^myfavour/(?P<userid>[0-9])/',views.get_user_favourite),
 ]

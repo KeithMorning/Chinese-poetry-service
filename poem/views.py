@@ -32,6 +32,7 @@ def favorite_poetry(request):
     print(json_data)
     poetry_id = json_data.get('poetry_id',None)
     user_id = json_data.get('user_id',None)
+    favour = json_data.get('favour',None)
     if poetry_id == None:
         return JsonResponse({"success":False,'error':'poetry_id is null'})
 
@@ -39,7 +40,7 @@ def favorite_poetry(request):
         return JsonResponse({"success":False,'error':'user_id is null'})
     user = User.objects.filter(pk=user_id).first()
     if(user == None):
-        print("can't find this user");
+        print("can't find this user")
         return JsonResponse({"success": False, 'error': 'can not find user'})
 
     poetry = Poetry.objects.filter(pk=poetry_id).first()
@@ -47,7 +48,16 @@ def favorite_poetry(request):
         print("can't find the poetry")
         return JsonResponse({"success": False, 'error': 'can not find poetry'})
 
-    user.favorate_peotry.add(poetry)
+    if favour == 1:
+        poetry.weight = poetry.weight + 1
+        poetry.save()
+        user.favorate_peotry.add(poetry)
+    else:
+        poetry.weight = poetry.weight - 1
+        poetry.save()
+        user.favorate_peotry.remove(poetry)
+
+
     user.save()
     return JsonResponse({"success":True})
 
@@ -60,6 +70,8 @@ def favorite_poem(request):
     print(json_data)
     poem_id = json_data.get('poem_id', None)
     user_id = json_data.get('user_id', None)
+    favour = json_data.get('favour', None)
+
     if poem_id == None:
         return JsonResponse({"success":False,'error':'poem id is null'})
 
@@ -75,7 +87,16 @@ def favorite_poem(request):
         print("can't find the poetry")
         return JsonResponse({"success": False, 'error': 'can not find poem'})
 
-    user.favorate_poem.add(poem)
+    if favour == 1:
+        poem.weight = poem.weight + 1
+        poem.save()
+        user.favorate_poem.add(poem)
+    else:
+        poem.weight = poem.weight - 1
+        poem.save()
+        user.favorate_poem.remove(poem)
+
+
     user.save()
     return JsonResponse({"success":True})
 
@@ -103,11 +124,25 @@ def WeichatLoginView(request):
     user.avataUrl = user_info['avatarUrl']
     user.gender = user_info['gender']
     user.location = user_info['province']
+    user.login_type = loginType;
     user.save()
 
     print(user_info)
     jwt = token = to_weichat_jwt(user)
     return JsonResponse({'jwt':jwt,'userId':user.id})
+
+@csrf_exempt
+def get_user_favourite(request,userid=None):
+    user =  User.objects.filter(pk=userid).first()
+    peotry_set = user.favorate_peotry.all()
+    poem_set = user.favorate_poem.all()
+
+    poetries = map(lambda p:PoetrySerializer(p).data,peotry_set)
+    poetries = list(poetries);
+    poems = map(lambda p:PoemSerializer(p).data,poem_set)
+    poems = list(poems)
+
+    return JsonResponse({'poetries':poetries,'poems':poems})
 
 
 class UserViewSet(viewsets.ModelViewSet):
