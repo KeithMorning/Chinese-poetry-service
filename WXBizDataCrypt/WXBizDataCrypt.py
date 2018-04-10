@@ -1,5 +1,5 @@
 import base64
-import json
+import simplejson
 from Crypto.Cipher import AES
 
 class WXBizDataCrypt:
@@ -15,7 +15,7 @@ class WXBizDataCrypt:
 
         cipher = AES.new(sessionKey, AES.MODE_CBC, iv)
 
-        decrypted = json.loads(self._unpad(cipher.decrypt(encryptedData)))
+        decrypted = simplejson.loads(self._unpad(cipher.decrypt(encryptedData)))
 
         if decrypted['watermark']['appid'] != self.appId:
             raise Exception('Invalid Buffer')
