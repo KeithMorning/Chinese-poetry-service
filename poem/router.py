@@ -40,7 +40,7 @@ class ApiListView(routers.APIRootView):
         ret['weichatOAuth'] = uri + "weichatOAuth"
         ret['favour-poetry'] = uri + 'favour-poetry'
         ret['favour-poem'] = uri + 'favour-poem'
-        ret['myfavour'] = uri + 'myfavour'
+        ret['myfavour'] = uri + 'myfavour/2'
         return Response(ret)
 
 
