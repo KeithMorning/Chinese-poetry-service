@@ -134,6 +134,9 @@ def WeichatLoginView(request):
 @csrf_exempt
 def get_user_favourite(request,userid=None):
     user =  User.objects.filter(pk=userid).first()
+    if user == None:
+        return JsonResponse({"success": False, 'error': 'can not find user'})
+
     peotry_set = user.favorate_peotry.all()
     poem_set = user.favorate_poem.all()
 
