@@ -1,10 +1,9 @@
 from weixin import WXAPPAPI
-from weixin.lib import WXBizMsgCrypt
 from rest_framework_jwt.settings import api_settings
 import random
+from WXBizDataCrypt.WXBizDataCrypt import WXBizDataCrypt
 
-
-def get_user_info(appcode,appid,appsecret):
+def get_session_info(appcode,appid,appsecret):
 
     api = WXAPPAPI(appid=appid,app_secret=appsecret)
     session_info = api.exchange_code_for_session_key(code=appcode)
@@ -25,3 +24,8 @@ def to_weichat_jwt(user):
 
 def random_passwd():
     return ''.join(str(random.choice(range(10))) for _ in range(10))
+
+def get_user_info(session_key,appid,encryptdata,iv):
+    crypt = WXBizDataCrypt(appid,session_key)
+    userinfo = crypt.decrypt(encryptdata,iv)
+    return userinfo

@@ -5,14 +5,16 @@ from rest_framework import viewsets,status
 from rest_framework.decorators import api_view,detail_route
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated,AllowAny
-from rest_framework.views import APIView
-from django_filters.rest_framework import DjangoFilterBackend
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import permission_classes
+from rest_framework import permissions
+import simplejson
 
 from .models import Poem,User
 from .serializers import Poetry,Author
 from .serializers import UserSerializer,PoemSerializer,AuthorSerializer,PoetrySerializer
 from .myPagination import mypagination
-from .weichat_tools import get_user_info,to_weichat_jwt,random_passwd
+from .weichat_tools import get_session_info,to_weichat_jwt,random_passwd,get_user_info
 from . import apps
 
 
@@ -21,16 +23,91 @@ class Serializer(Buildin_Serializer):
         return self._current
 # Create your views here.
 
-def WeichatLoginView(resquest):
-    code = resquest.GET.get('code',None)
-    session_key,openid = get_user_info(code,apps.APP_ID,appsecret=apps.APP_SECRET)
+@csrf_exempt
+@permission_classes((permissions.IsAuthenticated,))
+def favorite_poetry(request):
+    if request.method != 'POST':
+        return JsonResponse({"success":False,'error':'Not a valid request'})
+    json_data = simplejson.loads(request.body);
+    print(json_data)
+    poetry_id = json_data.get('poetry_id',None)
+    user_id = json_data.get('user_id',None)
+    if poetry_id == None:
+        return JsonResponse({"success":False,'error':'poetry_id is null'})
+
+    if user_id == None:
+        return JsonResponse({"success":False,'error':'user_id is null'})
+    user = User.objects.filter(pk=user_id).first()
+    if(user == None):
+        print("can't find this user");
+        return JsonResponse({"success": False, 'error': 'can not find user'})
+
+    poetry = Poetry.objects.filter(pk=poetry_id).first()
+    if(poetry == None):
+        print("can't find the poetry")
+        return JsonResponse({"success": False, 'error': 'can not find poetry'})
+
+    user.favorate_peotry.add(poetry)
+    user.save()
+    return JsonResponse({"success":True})
+
+@csrf_exempt
+@permission_classes((permissions.IsAuthenticated,))
+def favorite_poem(request):
+    if request.method != 'POST':
+        return JsonResponse({"success":False,'error':'Not a valid request'})
+    json_data = simplejson.loads(request.body);
+    print(json_data)
+    poem_id = json_data.get('poem_id', None)
+    user_id = json_data.get('user_id', None)
+    if poem_id == None:
+        return JsonResponse({"success":False,'error':'poem id is null'})
+
+    if user_id == None:
+        return JsonResponse({"success":False,'error':'user_id is null'})
+    user = User.objects.filter(pk=user_id).first()
+    if(user == None):
+        print("can't find this user");
+        return JsonResponse({"success": False, 'error': 'can not find user'})
+
+    poem = Poem.objects.filter(pk=poem_id).first()
+    if(poem == None):
+        print("can't find the poetry")
+        return JsonResponse({"success": False, 'error': 'can not find poem'})
+
+    user.favorate_poem.add(poem)
+    user.save()
+    return JsonResponse({"success":True})
+
+
+
+@csrf_exempt
+@permission_classes((permissions.AllowAny,))
+def WeichatLoginView(request):
+
+    json_data = simplejson.loads(request.body);
+    print(json_data)
+
+    code = json_data.get('code',None)
+    encryptedData = json_data.get('encryptedData',None)
+    iv = json_data.get('iv',None)
+    loginType = json_data.get('loginType')
+    session_key,openid = get_session_info(code,apps.APP_ID,appsecret=apps.APP_SECRET)
     users = User.objects.filter(username=openid)
     if users == None or users.count()==0:
         user = User(username=openid,password=random_passwd(),email='n@n.com')
         user.save()
     user = users.first()
+    user_info = get_user_info(session_key,apps.APP_ID,encryptedData,iv)
+    user.nick_name = user_info['nickName']
+    user.avataUrl = user_info['avatarUrl']
+    user.gender = user_info['gender']
+    user.location = user_info['province']
+    user.save()
+
+    print(user_info)
     jwt = token = to_weichat_jwt(user)
-    return JsonResponse({'jwt':jwt})
+    return JsonResponse({'jwt':jwt,'userId':user.id})
 
 
 class UserViewSet(viewsets.ModelViewSet):

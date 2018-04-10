@@ -9,6 +9,8 @@ from django.urls.exceptions import NoReverseMatch
 class ApiListView(routers.APIRootView):
     """
     `authors/13175/poem/` 获取对应作者的词
+    `favorate-poetry` 为POST方法，body = {'poetry_id':3,'user_id':2}
+    `favorate-poem` 为POST 方法， body = {'poem_id':11,'user_id':3}
     """
 
     def get(self, request, *args, **kwargs):
@@ -33,6 +35,9 @@ class ApiListView(routers.APIRootView):
         ret['author-T'] = uri + "authors?dynasty=T"
         ret['author-poetry'] = uri+"authors/1/poetry/"
         ret['author-poem'] = uri + "authors/13175/poem/"
+        ret['weichatOAuth'] = uri + "weichatOAuth"
+        ret['favorate-poetry'] = uri + 'favorate-poetry'
+        ret['favorate-poem'] = uri + 'favorate-poem'
         return Response(ret)
 
 

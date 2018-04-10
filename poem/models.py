@@ -51,5 +51,7 @@ class User (AbstractUser):
     location = models.CharField(max_length=100, blank=True)
     favorate_peotry = models.ManyToManyField(Poetry)
     favorate_poem = models.ManyToManyField(Poem)
+    avataUrl=models.URLField(null=True)
+    gender = models.IntegerField(null=True)
 
 
