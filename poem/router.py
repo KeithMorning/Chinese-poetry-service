@@ -8,7 +8,7 @@ from django.urls.exceptions import NoReverseMatch
 
 class ApiListView(routers.APIRootView):
     """
-    * `authors/13175/poem/` 获取对应作者的词
+    * `authors/1/poetry/` 获取对应作者的作品
 
     * `favour-poetry` 为 POST 方法，`body = {'poetry_id':3,'user_id':2,'favour':1}` 1 收藏，0 取消收藏
 
