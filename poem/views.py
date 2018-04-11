@@ -10,7 +10,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 import simplejson
 
-from .models import Poem,User
+from .models import User
 from .serializers import Poetry,Author
 from .serializers import UserSerializer,PoemSerializer,AuthorSerializer,PoetrySerializer
 from .myPagination import mypagination
@@ -61,45 +61,6 @@ def favorite_poetry(request):
     user.save()
     return JsonResponse({"success":True})
 
-@csrf_exempt
-@permission_classes((permissions.IsAuthenticated,))
-def favorite_poem(request):
-    if request.method != 'POST':
-        return JsonResponse({"success":False,'error':'Not a valid request'})
-    json_data = simplejson.loads(request.body);
-    print(json_data)
-    poem_id = json_data.get('poem_id', None)
-    user_id = json_data.get('user_id', None)
-    favour = json_data.get('favour', None)
-
-    if poem_id == None:
-        return JsonResponse({"success":False,'error':'poem id is null'})
-
-    if user_id == None:
-        return JsonResponse({"success":False,'error':'user_id is null'})
-    user = User.objects.filter(pk=user_id).first()
-    if(user == None):
-        print("can't find this user");
-        return JsonResponse({"success": False, 'error': 'can not find user'})
-
-    poem = Poem.objects.filter(pk=poem_id).first()
-    if(poem == None):
-        print("can't find the poetry")
-        return JsonResponse({"success": False, 'error': 'can not find poem'})
-
-    if favour == 1:
-        poem.weight = poem.weight + 1
-        poem.save()
-        user.favorate_poem.add(poem)
-    else:
-        poem.weight = poem.weight - 1
-        poem.save()
-        user.favorate_poem.remove(poem)
-
-
-    user.save()
-    return JsonResponse({"success":True})
-
 
 
 @csrf_exempt
@@ -138,14 +99,11 @@ def get_user_favourite(request,userid=None):
         return JsonResponse({"success": False, 'error': 'can not find user'})
 
     peotry_set = user.favorate_peotry.all()
-    poem_set = user.favorate_poem.all()
 
     poetries = map(lambda p:PoetrySerializer(p).data,peotry_set)
     poetries = list(poetries);
-    poems = map(lambda p:PoemSerializer(p).data,poem_set)
-    poems = list(poems)
 
-    return JsonResponse({'poetries':poetries,'poems':poems})
+    return JsonResponse({'poetries':poetries})
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -153,26 +111,6 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class PoemViewSet(viewsets.ReadOnlyModelViewSet):
-
-    queryset = Poem.objects.all()
-    serializer_class = PoemSerializer
-    pagination_class = mypagination
-
-    @detail_route(['GET'])
-    def random(self,request):
-
-        count = Poem.objects.count()
-        id = random.randint(0, count)
-
-        try:
-            p = Poem.objects.get(pk=id)
-        except Poem.DoesNotExist:
-            return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
-
-        if request.method == 'GET':
-            poemserial = PoemSerializer(p)
-            return Response(poemserial.data)
 
 class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
 
@@ -182,7 +120,7 @@ class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
 
     @detail_route(['GET'])
     def random(self,request):
-        count = Poem.objects.count()
+        count = Poetry.objects.count()
         pk = random.randint(0, count)
 
         try:
@@ -214,12 +152,6 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
         poetries = Poetry.objects.filter(author=pk)
         poetries_result = PoetrySerializer(poetries, many=True)
         return Response(poetries_result.data)
-
-    @detail_route(['GET'])
-    def poem(self,request,pk):
-        poems = Poem.objects.filter(author=pk)
-        poems_result = PoemSerializer(poems, many=True)
-        return Response(poems_result.data)
 
 
 

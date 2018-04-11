@@ -36,10 +36,8 @@ class ApiListView(routers.APIRootView):
         uri = request.build_absolute_uri();
         ret['author-T'] = uri + "authors?dynasty=T"
         ret['author-poetry'] = uri+"authors/1/poetry/"
-        ret['author-poem'] = uri + "authors/13175/poem/"
         ret['weichatOAuth'] = uri + "weichatOAuth"
         ret['favour-poetry'] = uri + 'favour-poetry'
-        ret['favour-poem'] = uri + 'favour-poem'
         ret['myfavour'] = uri + 'myfavour/2'
         return Response(ret)
 

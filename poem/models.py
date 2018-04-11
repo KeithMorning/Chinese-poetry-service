@@ -16,12 +16,13 @@ class Author(models.Model):
         db_table = 'poem_author'
 
 
-
+#弃用Poem，Poetry和poem一张表
 class Poem(models.Model):
     title = models.CharField(max_length=150)
     content = models.TextField()
     author = models.ForeignKey(Author,on_delete=models.CASCADE)
     dynasty = models.CharField(max_length=10,default='S')
+    type = models.CharField(max_length=10, default='poem')
     author_name = models.CharField(max_length=150)
     weight = models.IntegerField()
     class Meta:
@@ -34,6 +35,7 @@ class Poetry(models.Model):
     author = models.ForeignKey(Author,related_name='poetries',on_delete=models.CASCADE)
     content = models.TextField()
     dynasty = models.CharField(max_length=10)
+    type = models.CharField(max_length=10, default='poetry')
     author_name = models.CharField(max_length=150)
     weight = models.IntegerField()
 
@@ -50,7 +52,6 @@ class User (AbstractUser):
     nick_name = models.CharField(max_length=100, blank=True)
     location = models.CharField(max_length=100, blank=True)
     favorate_peotry = models.ManyToManyField(Poetry)
-    favorate_poem = models.ManyToManyField(Poem)
     avataUrl=models.URLField(null=True)
     gender = models.IntegerField(null=True)
 
