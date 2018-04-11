@@ -10,9 +10,13 @@ class ApiListView(routers.APIRootView):
     """
     * `authors/1/poetry/` 获取对应作者的作品
 
-    * `favour-poetry` 为 POST 方法，`body = {'poetry_id':3,'user_id':2,'favour':1}` 1 收藏，0 取消收藏
+    * `favour-poetry` 为 POST 方法，`POST body = {'poetry_id':3,'user_id':2,'favour':1}` 1 收藏，0 取消收藏
 
-    * `favour-poem` 为 POST 方法， `body = {'poem_id':11,'user_id':3,'favour':1}`
+    * `favour-poem` 为 POST 方法， `POST body 为 {'poem_id':11,'user_id':3,'favour':1}`
+
+    * `favour-author` 为 POST 方法作者收藏 `POST body 为 {'author_id':122,'user_id':3,`favour`:1}`
+
+    * `myfavour` GET 方法，获取用户收藏列表，结构为 `myfavour/2`, 2 为user_id
     """
 
     def get(self, request, *args, **kwargs):
@@ -38,6 +42,7 @@ class ApiListView(routers.APIRootView):
         ret['author-poetry'] = uri+"authors/1/poetry/"
         ret['weichatOAuth'] = uri + "weichatOAuth"
         ret['favour-poetry'] = uri + 'favour-poetry'
+        ret['favour-author'] = uri + 'favour-author'
         ret['myfavour'] = uri + 'myfavour/2'
         return Response(ret)
 

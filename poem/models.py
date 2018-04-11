@@ -51,7 +51,8 @@ class User (AbstractUser):
     weichat_session_key = models.CharField(max_length=100,null=True)
     nick_name = models.CharField(max_length=100, blank=True)
     location = models.CharField(max_length=100, blank=True)
-    favorate_peotry = models.ManyToManyField(Poetry)
+    favourate_peotry = models.ManyToManyField(Poetry)
+    favourate_author = models.ManyToManyField(Author)
     avataUrl=models.URLField(null=True)
     gender = models.IntegerField(null=True)
 

@@ -23,9 +23,55 @@ class Serializer(Buildin_Serializer):
         return self._current
 # Create your views here.
 
+
+@csrf_exempt
+@permission_classes((IsAuthenticated,))
+def favourite_author(request):
+    if request.method != 'POST':
+        return JsonResponse({"success":False,'error':'Not a valid request'})
+
+    json_data = simplejson.loads(request.body)
+    print(json_data)
+    author_id = json_data.get('author_id',None)
+    user_id = json_data.get('author_id',None)
+    favour = json_data.get('favour',None)
+
+    if author_id == None:
+        return JsonResponse({"success": False, 'error': 'author_id is null'})
+
+    author = Author.objects.filter(pk = author_id).first()
+    if author == None:
+        return JsonResponse({"success": False, 'error': 'can not find this author'})
+
+    if user_id == None:
+        return JsonResponse(author_id)
+
+    user = User.objects.filter(pk=user_id).first()
+    if (user == None):
+        print("can't find this user")
+        return JsonResponse({"success": False, 'error': 'can not find user'})
+
+    if favour == 1:
+        author.weight = author.weight+1
+        author.save()
+        user.favourate_author.add(author)
+    else:
+        author.weight = author.weight+1
+        author.save()
+        user.favourate_author.remove(author)
+
+    user.save()
+
+    return JsonResponse({"success":True})
+
+
+
+
+
+
 @csrf_exempt
 @permission_classes((permissions.IsAuthenticated,))
-def favorite_poetry(request):
+def favourite_poetry(request):
     if request.method != 'POST':
         return JsonResponse({"success":False,'error':'Not a valid request'})
     json_data = simplejson.loads(request.body);
@@ -51,11 +97,11 @@ def favorite_poetry(request):
     if favour == 1:
         poetry.weight = poetry.weight + 1
         poetry.save()
-        user.favorate_peotry.add(poetry)
+        user.favourate_peotry.add(poetry)
     else:
         poetry.weight = poetry.weight - 1
         poetry.save()
-        user.favorate_peotry.remove(poetry)
+        user.favourate_peotry.remove(poetry)
 
 
     user.save()
@@ -98,12 +144,17 @@ def get_user_favourite(request,userid=None):
     if user == None:
         return JsonResponse({"success": False, 'error': 'can not find user'})
 
-    peotry_set = user.favorate_peotry.all()
+    peotry_set = user.favourate_peotry.all()
+    author_set = user.favourate_author.all()
 
     poetries = map(lambda p:PoetrySerializer(p).data,peotry_set)
-    poetries = list(poetries);
+    poetries = list(poetries)
 
-    return JsonResponse({'poetries':poetries})
+    authors = map(lambda a:AuthorSerializer(a).data,author_set)
+    authors = list(authors)
+
+
+    return JsonResponse({'poetries':poetries,'authors':authors})
 
 
 class UserViewSet(viewsets.ModelViewSet):
