@@ -9,6 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 import simplejson
+from django.utils.decorators import method_decorator
+
 
 from .models import User
 from .serializers import Poetry,Author
@@ -16,6 +18,7 @@ from .serializers import UserSerializer,PoemSerializer,AuthorSerializer,PoetrySe
 from .myPagination import mypagination
 from .weichat_tools import get_session_info,to_weichat_jwt,random_passwd,get_user_info
 from . import apps
+from rest_framework_jwt.utils import jwt_get_user_id_from_payload_handler
 
 
 class Serializer(Buildin_Serializer):
@@ -24,7 +27,6 @@ class Serializer(Buildin_Serializer):
 # Create your views here.
 
 
-@csrf_exempt
 @permission_classes((IsAuthenticated,))
 def favourite_author(request):
     if request.method != 'POST':
@@ -33,7 +35,7 @@ def favourite_author(request):
     json_data = simplejson.loads(request.body)
     print(json_data)
     author_id = json_data.get('author_id',None)
-    user_id = json_data.get('author_id',None)
+    user_id = json_data.get('user_id',None)
     favour = json_data.get('favour',None)
 
     if author_id == None:
@@ -184,14 +186,16 @@ class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
             return Response(poetryserial.data)
 
 
-
 class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = AuthorSerializer
     pagination_class = mypagination
     queryset = Author.objects.all()
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
+        userid = self.request.user.id
+        print(userid)
         queryset = Author.objects.all()
         dynasty = self.request.query_params.get('dynasty', None)
         if dynasty is not None:
