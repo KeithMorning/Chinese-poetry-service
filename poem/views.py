@@ -9,7 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 import simplejson
-from django.utils.decorators import method_decorator
+from django.db.models import Q
+from .customJoin import join_to
 
 
 from .models import User
@@ -195,20 +196,24 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         userid = self.request.user.id
-        print(userid)
         queryset = Author.objects.all()
         dynasty = self.request.query_params.get('dynasty', None)
         if dynasty is not None:
-            return queryset.filter(dynasty=dynasty)
-        return queryset
+            queryset.filter(dynasty=dynasty)
+
+        user = User.objects.get(pk=userid)
+        usr_fav_qs = user.favourate_author.all()
+
+        q = join_to(Author, usr_fav_qs, 'id', 'id', queryset, 't').extra(select={'isFav': 'NOT isnull(t.id)'})
+        print(q.query)
+
+        return q
 
     @detail_route(['GET'])
     def poetry(self,request,pk):
         poetries = Poetry.objects.filter(author=pk)
         poetries_result = PoetrySerializer(poetries, many=True)
         return Response(poetries_result.data)
-
-
 
 
 

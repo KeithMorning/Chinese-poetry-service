@@ -52,7 +52,7 @@ class User (AbstractUser):
     nick_name = models.CharField(max_length=100, blank=True)
     location = models.CharField(max_length=100, blank=True)
     favourate_peotry = models.ManyToManyField(Poetry)
-    favourate_author = models.ManyToManyField(Author)
+    favourate_author = models.ManyToManyField(Author,related_name='user_fav_authors')
     avataUrl=models.URLField(null=True)
     gender = models.IntegerField(null=True)
 
