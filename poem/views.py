@@ -171,6 +171,11 @@ class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PoetrySerializer
     pagination_class = mypagination
 
+    def get_queryset(self):
+        user_id = self.request.user.id
+        quertys_set = Poetry.objects.all().extra(select={'isFav':'1'})
+        return quertys_set
+
     @detail_route(['GET'])
     def random(self,request):
         count = Poetry.objects.count()
@@ -196,7 +201,8 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         userid = self.request.user.id
         print(userid)
-        queryset = Author.objects.all()
+        queryset = Author.objects.all().extra(select={'isFav':'1'})
+        print(queryset.query)
         dynasty = self.request.query_params.get('dynasty', None)
         if dynasty is not None:
             return queryset.filter(dynasty=dynasty)
