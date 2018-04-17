@@ -148,12 +148,12 @@ def get_user_favourite(request,userid=None):
         return JsonResponse({"success": False, 'error': 'can not find user'})
 
     peotry_set = user.favourate_peotry.all()
-    author_set = Author.favour_user.all().filter(user=user)
+    authors_set = user.author_set.all()
 
     poetries = map(lambda p:PoetrySerializer(p).data,peotry_set)
     poetries = list(poetries)
 
-    authors = map(lambda a:AuthorSerializer(a).data,author_set)
+    authors = map(lambda a:AuthorSerializer(a).data,authors_set)
     authors = list(authors)
 
 
