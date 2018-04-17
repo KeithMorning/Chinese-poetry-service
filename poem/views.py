@@ -204,8 +204,10 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
         user = User.objects.get(pk=userid)
         fav_author = user.author_set.all()
         queryset = Author.objects.all().\
-            extra(select={'isFav':'CASE ISNULL(author_id) when 1 THEN 0 WHEN 0 THEN 1 END'}).query.where()
+            extra(select={'isFav':'CASE user_id='+str(userid)+' when 1 THEN 0 WHEN 0 THEN 1 else 0 END'}).filter(Q(favour_user=userid)|~Q(id__in=fav_author))
+        print(queryset.query)
         dynasty = self.request.query_params.get('dynasty', None)
+        print(queryset.query)
         if dynasty is not None:
             return queryset.filter(dynasty=dynasty)
         return queryset

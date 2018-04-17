@@ -14,7 +14,7 @@ class Poetry(models.Model):
     type = models.CharField(max_length=10, default='poetry')
     author_name = models.CharField(max_length=150)
     weight = models.IntegerField()
-    isFav = 0
+    isFav = 1
 
     class Meta:
         db_table = 'poem_poetry'
@@ -38,7 +38,7 @@ class Author(models.Model):
     dynasty = models.CharField(max_length=10, blank=True, null=True)
     weight = models.IntegerField()
     favour_user = models.ManyToManyField(User)
-    isFav = 0
+    isFav = 1
 
     class Meta:
         db_table = 'poem_author'
