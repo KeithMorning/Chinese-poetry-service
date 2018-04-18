@@ -11,7 +11,7 @@ from rest_framework import permissions
 import simplejson
 from django.utils.decorators import method_decorator
 
-from django.db.models import FilteredRelation,Q
+from django.db.models import FilteredRelation,Q,Count
 from .models import User
 from .serializers import Poetry,Author
 from .serializers import UserSerializer,PoemSerializer,AuthorSerializer,PoetrySerializer
@@ -174,7 +174,13 @@ class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user_id = self.request.user.id
-        quertys_set = Poetry.objects.all().extra(select={'isFav':'1'})
+        user = User.objects.get(pk=user_id)
+        fav_poetry = user.poetry_set.all()
+        quertys_set = Poetry.objects.all().\
+            extra(select={'isFav':'CASE when user_id='+str(user_id)+' then 1 else 0 END'}).\
+            filter(Q(favour_user=user_id)|~Q(id__in=fav_poetry)).\
+            order_by('-weight').annotate(count=Count(id))
+        print(quertys_set.query)
         return quertys_set
 
     @detail_route(['GET'])
@@ -204,12 +210,16 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
         user = User.objects.get(pk=userid)
         fav_author = user.author_set.all()
         queryset = Author.objects.all().\
-            extra(select={'isFav':'CASE user_id='+str(userid)+' when 1 THEN 0 WHEN 0 THEN 1 else 0 END'}).filter(Q(favour_user=userid)|~Q(id__in=fav_author))
+            extra(select={'isFav':'CASE when user_id='+str(userid)+' then 1 else 0 END'}).\
+            filter(Q(favour_user=userid)|~Q(id__in=fav_author)).\
+            order_by('-weight').annotate(count=Count(id))
 
         dynasty = self.request.query_params.get('dynasty', None)
 
         if dynasty is not None:
-            return queryset.filter(dynasty=dynasty)
+           print(queryset.query)
+           return queryset.filter(dynasty=dynasty)
+
         return queryset
 
     @detail_route(['GET'])
