@@ -147,7 +147,7 @@ def get_user_favourite(request,userid=None):
     if user == None:
         return JsonResponse({"success": False, 'error': 'can not find user'})
 
-    peotry_set = user.favourate_peotry.all()
+    peotry_set = user.poetry_set.all()
     authors_set = user.author_set.all()
 
     poetries = map(lambda p:PoetrySerializer(p).data,peotry_set)
@@ -224,7 +224,15 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
 
     @detail_route(['GET'])
     def poetry(self,request,pk):
-        poetries = Poetry.objects.filter(author=pk)
+        user_id = self.request.user.id
+        user = User.objects.get(pk=user_id)
+        fav_poetry = user.poetry_set.all()
+        poetries = Poetry.objects.all(). \
+            extra(select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'}). \
+            filter(Q(favour_user=user_id) | ~Q(id__in=fav_poetry)).filter(Q(author=pk)). \
+            order_by('-weight').annotate(count=Count(id))
+        #poetries = Poetry.objects.filter(author=pk)
+        print(poetries.query)
         poetries_result = PoetrySerializer(poetries, many=True)
         return Response(poetries_result.data)
 
