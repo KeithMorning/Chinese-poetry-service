@@ -141,7 +141,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/home/pi/Documents/Django/Poems/Poems/static'
+#STATIC_ROOT = '/Users/keith/Documents/Project/Python/Poems/static'
+STATIC_ROOT = '/home/pi/Documents/Django/Poems/static'
 
 
 STATICFILES_DIRS = (
