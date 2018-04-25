@@ -142,7 +142,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 #STATIC_ROOT = '/Users/keith/Documents/Project/Python/Poems/static'
-STATIC_ROOT = '/home/pi/Documents/Django/Poems/static'
+STATIC_ROOT = '/home/pi/Documents/Django/Poems/Poems/static'
 
 
 STATICFILES_DIRS = (
