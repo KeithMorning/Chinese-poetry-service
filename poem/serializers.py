@@ -27,11 +27,11 @@ class PoemSerializer(serializers.ModelSerializer):
 class PoetrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Poetry
-        fields = ('id', 'title', 'content', 'author', 'dynasty', 'author_name','weight','type')
+        fields = ('id', 'title', 'content', 'author', 'dynasty', 'author_name','weight','type','isFav')
 
 
 class AuthorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Author
-        fields = ('id', 'name', 'intro', 'dynasty','weight')
+        fields = ('id', 'name', 'intro', 'dynasty','weight','isFav')
