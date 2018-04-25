@@ -11,14 +11,14 @@ from rest_framework import permissions
 import simplejson
 from django.utils.decorators import method_decorator
 
-
+from django.db.models import FilteredRelation,Q,Count
 from .models import User
 from .serializers import Poetry,Author
 from .serializers import UserSerializer,PoemSerializer,AuthorSerializer,PoetrySerializer
 from .myPagination import mypagination
 from .weichat_tools import get_session_info,to_weichat_jwt,random_passwd,get_user_info
 from . import apps
-from rest_framework_jwt.utils import jwt_get_user_id_from_payload_handler
+from .custom_join import join_to
 
 
 class Serializer(Buildin_Serializer):
@@ -38,6 +38,7 @@ def favourite_author(request):
     user_id = json_data.get('user_id',None)
     favour = json_data.get('favour',None)
 
+
     if author_id == None:
         return JsonResponse({"success": False, 'error': 'author_id is null'})
 
@@ -56,13 +57,13 @@ def favourite_author(request):
     if favour == 1:
         author.weight = author.weight+1
         author.save()
-        user.favourate_author.add(author)
+        author.favour_user.add(user)
     else:
         author.weight = author.weight+1
         author.save()
-        user.favourate_author.remove(author)
+        author.favour_user.remove(user)
 
-    user.save()
+    author.save()
 
     return JsonResponse({"success":True})
 
@@ -146,13 +147,13 @@ def get_user_favourite(request,userid=None):
     if user == None:
         return JsonResponse({"success": False, 'error': 'can not find user'})
 
-    peotry_set = user.favourate_peotry.all()
-    author_set = user.favourate_author.all()
+    peotry_set = user.poetry_set.all()
+    authors_set = user.author_set.all()
 
     poetries = map(lambda p:PoetrySerializer(p).data,peotry_set)
     poetries = list(poetries)
 
-    authors = map(lambda a:AuthorSerializer(a).data,author_set)
+    authors = map(lambda a:AuthorSerializer(a).data,authors_set)
     authors = list(authors)
 
 
@@ -170,6 +171,17 @@ class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Poetry.objects.all().order_by('id')
     serializer_class = PoetrySerializer
     pagination_class = mypagination
+
+    def get_queryset(self):
+        user_id = self.request.user.id
+        user = User.objects.get(pk=user_id)
+        fav_poetry = user.poetry_set.all()
+        quertys_set = Poetry.objects.all().\
+            extra(select={'isFav':'CASE when user_id='+str(user_id)+' then 1 else 0 END'}).\
+            filter(Q(favour_user=user_id)|~Q(id__in=fav_poetry)).\
+            order_by('-weight').annotate(count=Count(id))
+        print(quertys_set.query)
+        return quertys_set
 
     @detail_route(['GET'])
     def random(self,request):
@@ -195,16 +207,32 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         userid = self.request.user.id
-        print(userid)
-        queryset = Author.objects.all()
+        user = User.objects.get(pk=userid)
+        fav_author = user.author_set.all()
+        queryset = Author.objects.all().\
+            extra(select={'isFav':'CASE when user_id='+str(userid)+' then 1 else 0 END'}).\
+            filter(Q(favour_user=userid)|~Q(id__in=fav_author)).\
+            order_by('-weight').annotate(count=Count(id))
+
         dynasty = self.request.query_params.get('dynasty', None)
+
         if dynasty is not None:
-            return queryset.filter(dynasty=dynasty)
+           print(queryset.query)
+           return queryset.filter(dynasty=dynasty)
+
         return queryset
 
     @detail_route(['GET'])
     def poetry(self,request,pk):
-        poetries = Poetry.objects.filter(author=pk)
+        user_id = self.request.user.id
+        user = User.objects.get(pk=user_id)
+        fav_poetry = user.poetry_set.all()
+        poetries = Poetry.objects.all(). \
+            extra(select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'}). \
+            filter(Q(favour_user=user_id) | ~Q(id__in=fav_poetry)).filter(Q(author=pk)). \
+            order_by('-weight').annotate(count=Count(id))
+        #poetries = Poetry.objects.filter(author=pk)
+        print(poetries.query)
         poetries_result = PoetrySerializer(poetries, many=True)
         return Response(poetries_result.data)
 
