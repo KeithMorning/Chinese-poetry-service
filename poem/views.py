@@ -99,15 +99,13 @@ def favourite_poetry(request):
 
     if favour == 1:
         poetry.weight = poetry.weight + 1
-        poetry.save()
-        user.favourate_peotry.add(poetry)
+        poetry.favour_user.add(user)
     else:
         poetry.weight = poetry.weight - 1
-        poetry.save()
-        user.favourate_peotry.remove(poetry)
+        poetry.favour_user.remove(user)
 
+    poetry.save()
 
-    user.save()
     return JsonResponse({"success":True})
 
 
