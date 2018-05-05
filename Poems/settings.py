@@ -54,6 +54,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'poem_cache_table',
+    }
+}
+
+
 ROOT_URLCONF = 'Poems.urls'
 
 TEMPLATES = [

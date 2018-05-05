@@ -176,10 +176,9 @@ class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
         user_id = self.request.user.id
         user = User.objects.get(pk=user_id)
         fav_poetry = user.poetry_set.all()
-        quertys_set = Poetry.objects.all().\
-            extra(select={'isFav':'CASE when user_id='+str(user_id)+' then 1 else 0 END'}).\
-            filter(Q(favour_user=user_id)|~Q(id__in=fav_poetry)).\
-            order_by('-weight').annotate(count=Count(id))
+        quertys_set = Poetry.objects.filter(~Q(favour_user=user_id))
+        quertys_set = quertys_set | fav_poetry
+        quertys_set = quertys_set.order_by('-weight').extra(select={'isFav':'CASE when user_id='+str(user_id)+' then 1 else 0 END'})
         print(quertys_set.query)
         return quertys_set
 
@@ -206,34 +205,34 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        userid = self.request.user.id
-        user = User.objects.get(pk=userid)
+        user_id = self.request.user.id
+        user = User.objects.get(pk=user_id)
         fav_author = user.author_set.all()
-        queryset = Author.objects.all().\
-            extra(select={'isFav':'CASE when user_id='+str(userid)+' then 1 else 0 END'}).\
-            filter(Q(favour_user=userid)|~Q(id__in=fav_author)).\
-            order_by('-weight').annotate(count=Count(id))
+
+        quertys_set = Author.objects.filter(~Q(favour_user=user_id))
+        quertys_set = quertys_set | fav_author
+        quertys_set = quertys_set.order_by('-weight').extra(
+            select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'})
 
         dynasty = self.request.query_params.get('dynasty', None)
 
         if dynasty is not None:
-           print(queryset.query)
-           return queryset.filter(dynasty=dynasty)
+           return quertys_set.filter(dynasty=dynasty)
 
-        return queryset
+        print(quertys_set.query)
+        return quertys_set
 
     @detail_route(['GET'])
     def poetry(self,request,pk):
         user_id = self.request.user.id
         user = User.objects.get(pk=user_id)
         fav_poetry = user.poetry_set.all()
-        poetries = Poetry.objects.all(). \
-            extra(select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'}). \
-            filter(Q(favour_user=user_id) | ~Q(id__in=fav_poetry)).filter(Q(author=pk)). \
-            order_by('-weight').annotate(count=Count(id))
-        #poetries = Poetry.objects.filter(author=pk)
-        print(poetries.query)
-        poetries_result = PoetrySerializer(poetries, many=True)
+        quertys_set = Poetry.objects.filter(~Q(favour_user=user_id))
+        quertys_set = quertys_set | fav_poetry
+        quertys_set = quertys_set.order_by('-weight').extra(
+            select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'}).filter(Q(author=pk))
+        print(quertys_set.query)
+        poetries_result = PoetrySerializer(quertys_set, many=True)
         return Response(poetries_result.data)
 
 
