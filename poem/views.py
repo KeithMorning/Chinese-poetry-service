@@ -2,7 +2,7 @@ from django.core import serializers
 from django.core.serializers.json import Serializer as Buildin_Serializer
 from django.http import HttpResponse,JsonResponse
 from rest_framework import viewsets,status
-from rest_framework.decorators import api_view,detail_route
+from rest_framework.decorators import api_view,detail_route,action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.views.decorators.csrf import csrf_exempt
@@ -233,7 +233,22 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
         poetries_result = PoetrySerializer(quertys_set, many=True)
         return Response(poetries_result.data)
 
+    @action(methods=['GET'],detail=True,serializer_class=PoetrySerializer)
+    def poetry_list(self,request,pk):
+        user_id = self.request.user.id
+        user = User.objects.get(pk=user_id)
+        fav_poetry = user.poetry_set.all()
+        quertys_set = Poetry.objects.filter(~Q(favour_user=user_id))
+        quertys_set = quertys_set | fav_poetry
+        quertys_set = quertys_set.order_by('-weight').extra(
+            select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'}).filter(Q(author=pk))
+        page = self.paginate_queryset(quertys_set)
+        if page is not None:
+            serializer = self.get_serializer(page,many=True)
+            return self.get_paginated_response(serializer.data)
 
+        poetries_result = PoetrySerializer(quertys_set, many=True)
+        return Response(poetries_result.data)
 
 
 

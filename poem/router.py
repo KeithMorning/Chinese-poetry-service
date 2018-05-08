@@ -10,6 +10,8 @@ class ApiListView(routers.APIRootView):
     """
     * `authors/1/poetry/` 获取对应作者的作品
 
+    * `author-poetry-list` 分页获取对应作者的作品
+
     * `favour-poetry` 为 POST 方法，`POST body = {'poetry_id':3,'user_id':2,'favour':1}` 1 收藏，0 取消收藏
 
     * `favour-author` 为 POST 方法，用于收藏作者 `POST body 为 {'author_id':122,'user_id':3,`favour`:1}`
@@ -36,8 +38,9 @@ class ApiListView(routers.APIRootView):
                 # Don't bail out if eg. no list routes exist, only detail routes.
                 continue
         uri = request.build_absolute_uri();
-        ret['author-T'] = uri + "authors?dynasty=T"
+        ret['author-T'] = uri + "authors/?dynasty=T"
         ret['author-poetry'] = uri+"authors/1/poetry/"
+        ret['author-poetry-list'] = uri + "authors/1/poetry_list/"
         ret['weichatOAuth'] = uri + "weichatOAuth"
         ret['favour-poetry'] = uri + 'favour-poetry'
         ret['favour-author'] = uri + 'favour-author'
