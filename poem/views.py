@@ -176,7 +176,8 @@ class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
         fav_poetry = user.poetry_set.all()
         quertys_set = Poetry.objects.filter(~Q(favour_user=user_id))
         quertys_set = quertys_set | fav_poetry
-        quertys_set = quertys_set.order_by('-weight').extra(select={'isFav':'CASE when user_id='+str(user_id)+' then 1 else 0 END'})
+        quertys_set = quertys_set.order_by('-weight','id').\
+            extra(select={'isFav':'CASE when user_id='+str(user_id)+' then 1 else 0 END'}).distinct('weight','id')
         print(quertys_set.query)
         return quertys_set
 
@@ -207,15 +208,15 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
         user = User.objects.get(pk=user_id)
         fav_author = user.author_set.all()
 
-        quertys_set = Author.objects.filter(~Q(favour_user=user_id))
+        quertys_set = Author.objects.exclude(id__in=fav_author)
         quertys_set = quertys_set | fav_author
-        quertys_set = quertys_set.order_by('-weight').extra(
-            select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'})
+        quertys_set = quertys_set.order_by('-weight','id').extra(
+            select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END',}).distinct('weight','id')
 
         dynasty = self.request.query_params.get('dynasty', None)
 
         if dynasty is not None:
-           return quertys_set.filter(dynasty=dynasty)
+            quertys_set = quertys_set.filter(dynasty=dynasty)
 
         print(quertys_set.query)
         return quertys_set
@@ -227,8 +228,8 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
         fav_poetry = user.poetry_set.all()
         quertys_set = Poetry.objects.filter(~Q(favour_user=user_id))
         quertys_set = quertys_set | fav_poetry
-        quertys_set = quertys_set.order_by('-weight').extra(
-            select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'}).filter(Q(author=pk))
+        quertys_set = quertys_set.order_by('-weight','id').extra(
+            select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'}).filter(Q(author=pk)).distinct('weight','id')
         print(quertys_set.query)
         poetries_result = PoetrySerializer(quertys_set, many=True)
         return Response(poetries_result.data)
@@ -240,8 +241,8 @@ class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
         fav_poetry = user.poetry_set.all()
         quertys_set = Poetry.objects.filter(~Q(favour_user=user_id))
         quertys_set = quertys_set | fav_poetry
-        quertys_set = quertys_set.order_by('-weight').extra(
-            select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'}).filter(Q(author=pk))
+        quertys_set = quertys_set.order_by('-weight','id').extra(
+            select={'isFav': 'CASE when user_id=' + str(user_id) + ' then 1 else 0 END'}).filter(Q(author=pk)).distinct('weight','id')
         page = self.paginate_queryset(quertys_set)
         if page is not None:
             serializer = self.get_serializer(page,many=True)

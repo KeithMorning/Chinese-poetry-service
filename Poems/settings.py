@@ -99,11 +99,12 @@ WSGI_APPLICATION = 'Poems.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'OPTIONS': {
-            'read_default_file':os.path.join(BASE_DIR, 'Poems/mysql.conf'),
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'peotry',
+        'USER': 'pi',
+        'PASSWORD': 'dessertHello',
+        'HOST': 'hs.izixia.cn',
+        'PORT': '5432',
     }
 }
 
