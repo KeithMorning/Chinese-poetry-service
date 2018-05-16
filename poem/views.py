@@ -173,11 +173,9 @@ class PoetryViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user_id = self.request.user.id
         user = User.objects.get(pk=user_id)
-        fav_poetry = user.poetry_set.all()
         quertys_set = Poetry.objects.filter(~Q(favour_user=user_id))
-        quertys_set = quertys_set | fav_poetry
-        quertys_set = quertys_set.order_by('-weight','id').\
-            extra(select={'isFav':'CASE when user_id='+str(user_id)+' then 1 else 0 END'}).distinct('weight','id')
+        #quertys_set = quertys_set | fav_poetry
+        quertys_set = quertys_set.extra({'isFav':0}).filter(weight__gt=1000).order_by('-weight','id').distinct('weight','id')
         print(quertys_set.query)
         return quertys_set
 
