@@ -25,7 +25,7 @@ requests==2.18.4
 shellescape==3.4.1
 simplejson==3.6.3
 six==1.8.0
-urllib3==1.22
+urllib3==1.26.5
 xmltodict==0.11.0
 yapf==0.21.0
 zhconv==1.4.0
